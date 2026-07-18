@@ -1,0 +1,125 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions"
+           xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:ex="http://example.com"
+           targetNamespace="http://example.com" elementFormDefault="unqualified">
+
+    <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd" />
+
+    <xs:annotation>
+        <xs:appinfo source="http://www.ogf.org/dfdl/">
+            <dfdl:format ref="ex:GeneralFormat" separator="" initiator=""
+                         terminator="" textTrimKind="none" initiatedContent="no" ignoreCase="no"
+                         separatorPosition="infix" occursCountKind="parsed"
+                         emptyValueDelimiterPolicy="both" representation="text" textNumberRep="standard"
+                         lengthKind="delimited" encoding="UTF-8" encodingErrorPolicy="error" />
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:element name="Body">
+        <xs:complexType>
+            <xs:sequence>
+                <!-- disordered region: any mix of XEV, XPM, XSV, UNS, in any order/count -->
+                <xs:element name="Entry" maxOccurs="unbounded" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence dfdl:separator="+">
+                            <xs:element name="Tag" type="xs:string" dfdl:lengthKind="explicit" dfdl:length="3"/>
+
+                            <xs:choice dfdl:choiceDispatchKey="{ ../Tag }">
+                                <xs:element name="XEV" type="XEVType"  dfdl:choiceBranchKey="XEV"/>
+                                <xs:element name="XPM" type="XPMType"  dfdl:choiceBranchKey="XPM"/>
+                                <xs:element name="XSV" type="XSVType"  dfdl:choiceBranchKey="XSV"/>
+                                <xs:element name="UNS" type="UNSType"  dfdl:choiceBranchKey="UNS"/>
+                                <xs:element name="UNB" type="UNBType"  dfdl:choiceBranchKey="UNS"/>
+                                <xs:element name="UNH" type="UNHType"  dfdl:choiceBranchKey="UNS"/>
+                                <xs:element name="UNT" type="UNTType"  dfdl:choiceBranchKey="UNS"/>
+                                <xs:element name="UNZ" type="UNZType"  dfdl:choiceBranchKey="UNS"/>
+                            </xs:choice>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:complexType name="XEVType">
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+                <xs:element name="SEG-name" type="xs:string" />
+                <xs:element name="ActionId" type="xs:string" />
+                <xs:element name="ActionType" type="xs:string" />
+                <xs:element name="MOLevel" type="xs:string" />
+                <xs:element name="MOType" type="xs:string" />
+                <xs:element name="MOAttribute" type="xs:string" />
+                <xs:element name="ResponseInd" type="xs:string" />
+                <xs:element name="MOId" type="xs:string" />
+                <xs:element name="Priority" type="xs:string" />
+                <xs:element name="DateTime" type="xs:string" />
+            </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="XPMType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="PRMAction" type="xs:string" />
+            <xs:element name="MOLevel" type="xs:string" />
+            <xs:element name="PRMTypeId" type="xs:string" />
+            <xs:element name="PRMSubTypeId" type="xs:string" />
+            <xs:element name="PRMAttribute" type="xs:string" />
+            <xs:element name="PRMSetId" type="xs:string" />
+            <xs:element name="PRMParentId" type="xs:string" />
+            <xs:element name="PRMSiblingNo" type="xs:string" />
+            <xs:element name="PRMLevel" type="xs:string" />
+            <xs:element name="PRMSeqNo" type="xs:string" />
+            <xs:element name="PRMValSeqNo" type="xs:string" />
+            <xs:element name="PRMValueId" type="xs:string" />
+            <xs:element name="PRMResInd" type="xs:string" />
+            <xs:element name="PRMStatus" type="xs:string" />
+            <xs:element name="PRMValue" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="XSVType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="ServiceAction" type="xs:string" />
+            <xs:element name="BS" type="xs:string" />
+            <xs:element name="SS" type="xs:string" />
+            <xs:element name="MOId" type="xs:string" />
+            <xs:element name="Profile" type="xs:string" />
+            <xs:element name="PrePaidInd" type="xs:string" />
+            <xs:element name="SPCODE" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UNSType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="SectionId" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UNBType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="SYNTAX-IDENTIFIER" type="xs:string" />
+            <xs:element name="INTERCHANGE-SENDER" type="xs:string" />
+            <xs:element name="INTERCHANGE-RECIPIENT" type="xs:string" />
+            <xs:element name="PREPARATION" type="xs:string" />
+            <xs:element name="INTERCHANGE-CONTRO-REFERENCE" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UNHType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="MESSAGE-REFERENCE-NUMBER" type="xs:string"  />
+            <xs:element name="MESSAGE-IDENTIFIER" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UNTType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="NUMBER-OF-SEGMENTS-IN-THE-MSG" type="xs:string" />
+            <xs:element name="MESSAGE-REFERENCE-NUMBER" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="UNZType">
+        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
+            <xs:element name="SEG-name" type="xs:string" />
+            <xs:element name="INTERCHANGE-CONTROL-COUNT" type="xs:string" />
+            <xs:element name="INTERCHANGE-CONTROL-REFERENCE" type="xs:string" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

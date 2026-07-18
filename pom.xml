@@ -27,5 +27,19 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-netty</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-smooks</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.smooks.cartridges.edi</groupId>
+			<artifactId>smooks-edi-cartridge</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j2-impl</artifactId>
+			<version>2.23.1</version>
+		</dependency>
 	</dependencies>
 </project>
