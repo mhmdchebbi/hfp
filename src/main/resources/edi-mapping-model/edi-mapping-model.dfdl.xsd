@@ -121,10 +121,10 @@
             <xs:sequence dfdl:separator="" dfdl:separatorSuppressionPolicy="anyEmpty">
                 <xs:element ref="tns:UNH"/>
                 <xs:element ref="tns:XEV"/>
-                <xs:element ref="tns:UNS"/>
                 <xs:element name="Detail" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                         <xs:choice dfdl:choiceLengthKind="implicit">
+                            <xs:element ref="tns:UNS"/>
                             <xs:element ref="tns:XPM"/>
                             <xs:element ref="tns:XSV"/>
                         </xs:choice>
