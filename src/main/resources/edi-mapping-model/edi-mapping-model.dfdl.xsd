@@ -71,6 +71,7 @@
             <xs:sequence dfdl:separator="" dfdl:separatorSuppressionPolicy="anyEmpty">
                 <xs:element ref="tns:UNB"/>
                 <xs:element ref="tns:Message" maxOccurs="unbounded"/>
+                <xs:element ref="tns:UNZ"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -129,6 +130,7 @@
                         </xs:choice>
                     </xs:complexType>
                 </xs:element>
+                <xs:element ref="tns:UNT"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -243,5 +245,31 @@
         </xs:complexType>
     </xs:element>
 
+    <!-- =================================================================
+     UNT - Message trailer
+     UNT+000031+00000061442991'
+     ================================================================= -->
+    <xs:element name="UNT" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="UNT" dfdl:lengthKind="delimited"/>
+                <xs:element name="NumberOfSegmentsInMessage" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="MessageReferenceNumber" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
+    <!-- =================================================================
+     UNZ - Interchange trailer
+     UNZ+1+00000061442991'
+     ================================================================= -->
+    <xs:element name="UNZ" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="UNZ" dfdl:lengthKind="delimited"/>
+                <xs:element name="InterchangeControlCount" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="InterchangeControlReference" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 </xs:schema>
