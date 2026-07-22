@@ -1,125 +1,247 @@
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fn="http://www.w3.org/2005/xpath-functions"
-           xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:ex="http://example.com"
-           targetNamespace="http://example.com" elementFormDefault="unqualified">
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DFDL schema for BSCS MDCMD EDIFACT interchanges (message type MDCMD:iX2)
+  as exchanged between BSCS-GMD and BSCS-VMD (e.g. sample file 000061442991.edi).
 
-    <xs:include schemaLocation="org/apache/daffodil/xsd/DFDLGeneralFormat.dfdl.xsd" />
+  Reverse-engineered from a sample interchange. Field names for the custom
+  BSCS segments (XEV, XPM, XSV) are inferred from position/usage in the
+  sample and are NOT taken from an official BSCS EDI implementation guide.
+  Review the "spare"/reserved fields and adjust names/lengths/occurrences
+  as needed against your real BSCS MDCMD spec before production use.
+
+  Delimiters observed in the sample:
+    Segment terminator : '  (apostrophe), followed by optional CR/LF
+    Element separator  : +
+    Component separator: :
+    No release/escape character present in the sample.
+
+  Tested for well-formedness / structural sanity only (no Daffodil available
+  in this environment) - validate against your actual DFDL processor
+  (e.g. Apache Daffodil, IBM ACE) before production use.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/"
+           xmlns:tns="urn:bscs:mdcmd:edifact"
+           targetNamespace="urn:bscs:mdcmd:edifact"
+           elementFormDefault="qualified">
 
     <xs:annotation>
         <xs:appinfo source="http://www.ogf.org/dfdl/">
-            <dfdl:format ref="ex:GeneralFormat" separator="" initiator=""
-                         terminator="" textTrimKind="none" initiatedContent="no" ignoreCase="no"
-                         separatorPosition="infix" occursCountKind="parsed"
-                         emptyValueDelimiterPolicy="both" representation="text" textNumberRep="standard"
-                         lengthKind="delimited" encoding="UTF-8" encodingErrorPolicy="error" />
+
+                <dfdl:format
+                        representation="text"
+                        encoding="UTF-8"
+                        initiator=""
+                        terminator=""
+                        separator=""
+                        outputNewLine="%CR;%LF;"
+                        byteOrder="bigEndian"
+                        bitOrder="mostSignificantBitFirst"
+                        lengthKind="delimited"
+                        leadingSkip="0"
+                        trailingSkip="0"
+                        alignment="1"
+                        alignmentUnits="bytes"
+                        fillByte="%SP;"
+                        textTrimKind="none"
+                        textPadKind="none"
+                        textStringJustification="left"
+                        textNumberJustification="right"
+                        truncateSpecifiedLengthString="no"
+                        ignoreCase="no"
+                        textBidi="no"
+                        floating="no"
+                        textNumberRep="standard"
+                        separatorSuppressionPolicy="anyEmpty"
+                        separatorPosition="infix"
+                        initiatedContent="no"
+                        sequenceKind="ordered"
+                        occursCountKind="implicit"
+                        documentFinalTerminatorCanBeMissing="yes"
+                        escapeSchemeRef=""/>
+
         </xs:appinfo>
     </xs:annotation>
 
-    <xs:element name="Body">
+    <!-- =================================================================
+         Root: one Interchange = UNB, one or more Messages, UNZ
+         ================================================================= -->
+    <xs:element name="Interchange" dfdl:lengthKind="implicit">
         <xs:complexType>
-            <xs:sequence>
-                <!-- disordered region: any mix of XEV, XPM, XSV, UNS, in any order/count -->
-                <xs:element name="Entry" maxOccurs="unbounded" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence dfdl:separator="+">
-                            <xs:element name="Tag" type="xs:string" dfdl:lengthKind="explicit" dfdl:length="3"/>
+            <xs:sequence dfdl:separator="" dfdl:separatorSuppressionPolicy="anyEmpty">
+                <xs:element ref="tns:UNB"/>
+                <xs:element ref="tns:Message" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
 
-                            <xs:choice dfdl:choiceDispatchKey="{ ../Tag }">
-                                <xs:element name="XEV" type="XEVType"  dfdl:choiceBranchKey="XEV"/>
-                                <xs:element name="XPM" type="XPMType"  dfdl:choiceBranchKey="XPM"/>
-                                <xs:element name="XSV" type="XSVType"  dfdl:choiceBranchKey="XSV"/>
-                                <xs:element name="UNS" type="UNSType"  dfdl:choiceBranchKey="UNS"/>
-                                <xs:element name="UNB" type="UNBType"  dfdl:choiceBranchKey="UNS"/>
-                                <xs:element name="UNH" type="UNHType"  dfdl:choiceBranchKey="UNS"/>
-                                <xs:element name="UNT" type="UNTType"  dfdl:choiceBranchKey="UNS"/>
-                                <xs:element name="UNZ" type="UNZType"  dfdl:choiceBranchKey="UNS"/>
-                            </xs:choice>
+    <!-- =================================================================
+         UNB - Interchange header
+         UNB+UNOB:3+BSCS-GMD+BSCS-VMD+140916:0853+00000061442991'
+         ================================================================= -->
+    <xs:element name="UNB" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="UNB" dfdl:lengthKind="delimited"/>
+
+                <!-- S001 Syntax identifier: SyntaxIdentifier:SyntaxVersionNumber -->
+                <xs:element name="SyntaxIdentifier" dfdl:lengthKind="delimited">
+                    <xs:complexType>
+                        <xs:sequence dfdl:separator=":" dfdl:separatorPosition="infix">
+                            <xs:element name="SyntaxId" type="xs:string" dfdl:lengthKind="delimited"/>
+                            <xs:element name="SyntaxVersionNumber" type="xs:string" dfdl:lengthKind="delimited"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="SenderIdentification" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="RecipientIdentification" type="xs:string" dfdl:lengthKind="delimited"/>
+
+                <!-- S004 Date/time of preparation: Date:Time (YYMMDD:HHMM) -->
+                <xs:element name="DateTimeOfPreparation" dfdl:lengthKind="delimited">
+                    <xs:complexType>
+                        <xs:sequence dfdl:separator=":" dfdl:separatorPosition="infix">
+                            <xs:element name="Date" type="xs:string" dfdl:lengthKind="delimited"/>
+                            <xs:element name="Time" type="xs:string" dfdl:lengthKind="delimited"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+
+                <xs:element name="InterchangeControlReference" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- =================================================================
+         Message: UNH .. body .. UNT
+         ================================================================= -->
+    <xs:element name="Message" dfdl:lengthKind="implicit">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="" dfdl:separatorSuppressionPolicy="anyEmpty">
+                <xs:element ref="tns:UNH"/>
+                <xs:element ref="tns:XEV"/>
+                <xs:element ref="tns:UNS"/>
+                <xs:element name="Detail" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:choice dfdl:choiceLengthKind="implicit">
+                            <xs:element ref="tns:XPM"/>
+                            <xs:element ref="tns:XSV"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- =================================================================
+         UNH - Message header
+         UNH+00000061442991+MDCMD:iX2'
+         ================================================================= -->
+    <xs:element name="UNH" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="UNH" dfdl:lengthKind="delimited"/>
+                <xs:element name="MessageReferenceNumber" type="xs:string" dfdl:lengthKind="delimited"/>
+
+                <!-- S009 Message identifier: MessageType:MessageVersionNumber -->
+                <xs:element name="MessageIdentifier" dfdl:lengthKind="delimited">
+                    <xs:complexType>
+                        <xs:sequence dfdl:separator=":" dfdl:separatorPosition="infix">
+                            <xs:element name="MessageType" type="xs:string" dfdl:lengthKind="delimited"/>
+                            <xs:element name="MessageVersionNumber" type="xs:string" dfdl:lengthKind="delimited"/>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
-    <xs:complexType name="XEVType">
-            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-                <xs:element name="SEG-name" type="xs:string" />
-                <xs:element name="ActionId" type="xs:string" />
-                <xs:element name="ActionType" type="xs:string" />
-                <xs:element name="MOLevel" type="xs:string" />
-                <xs:element name="MOType" type="xs:string" />
-                <xs:element name="MOAttribute" type="xs:string" />
-                <xs:element name="ResponseInd" type="xs:string" />
-                <xs:element name="MOId" type="xs:string" />
-                <xs:element name="Priority" type="xs:string" />
-                <xs:element name="DateTime" type="xs:string" />
+
+    <!-- =================================================================
+         XEV - BSCS event/action segment (custom, not standard EDIFACT)
+         XEV+1+ADD+CONTRACT+++Y+02+09+20140916085302'
+         ================================================================= -->
+    <xs:element name="XEV" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="XEV" dfdl:lengthKind="delimited"/>
+                <xs:element name="SequenceNumber" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="ActionCode" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="ObjectType" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare1" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare2" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Flag" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="SwitchId" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="MarketId" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="EventTimestamp" type="xs:string" dfdl:lengthKind="delimited"/>
             </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="XPMType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="PRMAction" type="xs:string" />
-            <xs:element name="MOLevel" type="xs:string" />
-            <xs:element name="PRMTypeId" type="xs:string" />
-            <xs:element name="PRMSubTypeId" type="xs:string" />
-            <xs:element name="PRMAttribute" type="xs:string" />
-            <xs:element name="PRMSetId" type="xs:string" />
-            <xs:element name="PRMParentId" type="xs:string" />
-            <xs:element name="PRMSiblingNo" type="xs:string" />
-            <xs:element name="PRMLevel" type="xs:string" />
-            <xs:element name="PRMSeqNo" type="xs:string" />
-            <xs:element name="PRMValSeqNo" type="xs:string" />
-            <xs:element name="PRMValueId" type="xs:string" />
-            <xs:element name="PRMResInd" type="xs:string" />
-            <xs:element name="PRMStatus" type="xs:string" />
-            <xs:element name="PRMValue" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="XSVType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="ServiceAction" type="xs:string" />
-            <xs:element name="BS" type="xs:string" />
-            <xs:element name="SS" type="xs:string" />
-            <xs:element name="MOId" type="xs:string" />
-            <xs:element name="Profile" type="xs:string" />
-            <xs:element name="PrePaidInd" type="xs:string" />
-            <xs:element name="SPCODE" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="UNSType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="SectionId" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="UNBType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="SYNTAX-IDENTIFIER" type="xs:string" />
-            <xs:element name="INTERCHANGE-SENDER" type="xs:string" />
-            <xs:element name="INTERCHANGE-RECIPIENT" type="xs:string" />
-            <xs:element name="PREPARATION" type="xs:string" />
-            <xs:element name="INTERCHANGE-CONTRO-REFERENCE" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="UNHType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="MESSAGE-REFERENCE-NUMBER" type="xs:string"  />
-            <xs:element name="MESSAGE-IDENTIFIER" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="UNTType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="NUMBER-OF-SEGMENTS-IN-THE-MSG" type="xs:string" />
-            <xs:element name="MESSAGE-REFERENCE-NUMBER" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
-    <xs:complexType name="UNZType">
-        <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix" dfdl:separatorSuppressionPolicy="trailingEmpty">
-            <xs:element name="SEG-name" type="xs:string" />
-            <xs:element name="INTERCHANGE-CONTROL-COUNT" type="xs:string" />
-            <xs:element name="INTERCHANGE-CONTROL-REFERENCE" type="xs:string" />
-        </xs:sequence>
-    </xs:complexType>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- =================================================================
+         UNS - Section control, marks header/detail/summary boundaries
+         UNS+S'
+         ================================================================= -->
+    <xs:element name="UNS" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="UNS" dfdl:lengthKind="delimited"/>
+                <xs:element name="SectionIdentification" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- =================================================================
+         XPM - BSCS parameter maintenance segment (custom)
+         XPM+ADD+CONTRACT+++MARKET_ID++++++++++GSM'
+         XPM+ADD+RESOURCE+DIR_NUM++DIR_NUM+1+++++++++21698452494'
+         Fields 7-14 are unused/spare in the sample; kept as optional
+         placeholders in case other MDCMD variants populate them.
+         ================================================================= -->
+    <xs:element name="XPM" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="XPM" dfdl:lengthKind="delimited"/>
+                <xs:element name="ActionCode" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="ObjectType" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="ResourceType" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare1" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="ParameterName" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="InstanceId" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare2" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare3" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare4" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare5" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare6" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare7" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare8" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="Spare9" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="ParameterValue" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- =================================================================
+         XSV - BSCS service/feature value segment (custom)
+         XSV+ADD++GG+02+TUNTT+N+14'
+         XSV+ADD+T11++02+TUNTT+N+1'
+         FeatureCode and ServiceCode are alternates: only one of the two is
+         populated per occurrence in the sample (e.g. T11/B1F/T22 vs.
+         GG/29/G7/G4/42/21/2A/41/2B/C3/11).
+         ================================================================= -->
+    <xs:element name="XSV" dfdl:lengthKind="delimited" dfdl:terminator="'%WSP*;">
+        <xs:complexType>
+            <xs:sequence dfdl:separator="+" dfdl:separatorPosition="infix">
+                <xs:element name="Tag" type="xs:string" fixed="XSV" dfdl:lengthKind="delimited"/>
+                <xs:element name="ActionCode" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="FeatureCode" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="ServiceCode" type="xs:string" minOccurs="0" dfdl:lengthKind="delimited"/>
+                <xs:element name="SwitchId" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="TariffTable" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="Flag" type="xs:string" dfdl:lengthKind="delimited"/>
+                <xs:element name="Value" type="xs:string" dfdl:lengthKind="delimited"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+
 </xs:schema>
