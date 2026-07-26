@@ -32,14 +32,14 @@
 			<artifactId>camel-smooks</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.smooks.cartridges.edi</groupId>
-			<artifactId>smooks-edi-cartridge</artifactId>
-			<version>2.1.0</version>
+			<groupId>org.smooks.cartridges</groupId>
+			<artifactId>smooks-dfdl-cartridge</artifactId>
+			<version>1.0.3</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j2-impl</artifactId>
-			<version>2.23.1</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.5.38</version>
 		</dependency>
 	</dependencies>
 </project>
