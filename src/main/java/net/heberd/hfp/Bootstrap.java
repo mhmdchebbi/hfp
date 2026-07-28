@@ -12,9 +12,7 @@ public class Bootstrap {
 		try (CamelContext ctx = new DefaultCamelContext()) {
 			ctx.addRoutes(new EdifactAdapter());
 			ctx.start();
-
-			Thread.sleep(3000);
-
+			Thread.sleep(10000);
 			ctx.stop();
 		}
 
