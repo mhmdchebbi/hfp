@@ -1,10 +1,7 @@
 package net.heberd.hfp.adapters;
 
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.netty.NettyHelper;
-import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
 
 public class EdifactAdapter extends RouteBuilder {
 
@@ -14,7 +11,7 @@ public class EdifactAdapter extends RouteBuilder {
 	public void configure() throws Exception {
 
 		//from("file:input/edi?noop=true&include=.*\\.edi")
-		from("netty:tcp://localhost:7070?textline=false&sync=true&reuseChannel=true&keepAlive=true")
+		from("netty:tcp://localhost:7070?textline=false&sync=true&reuseChannel=true")
 				.log("Raw message: ${body}")
 				.process(edifactProcessor)
 				.log("Received message: ${body}")

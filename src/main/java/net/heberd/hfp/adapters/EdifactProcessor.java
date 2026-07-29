@@ -1,7 +1,9 @@
 package net.heberd.hfp.adapters;
 
+import io.netty.channel.Channel;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.component.netty.NettyConstants;
 import org.apache.commons.lang3.StringUtils;
 
 public class EdifactProcessor implements Processor {
@@ -9,9 +11,7 @@ public class EdifactProcessor implements Processor {
 
     @Override
     public void process(Exchange exchange) throws Exception {
-        io.netty.channel.Channel channel =
-                exchange.getIn().getHeader(org.apache.camel.component.netty.NettyConstants.NETTY_CHANNEL, io.netty.channel.Channel.class);
-
+        Channel channel = exchange.getProperty(NettyConstants.NETTY_CHANNEL, Channel.class);
         String payload = exchange.getMessage().getBody(String.class);
         String edifact = "UNB" + StringUtils.substringAfter(payload, "UNB");
         this.header = StringUtils.substringBefore(payload, "UNB");

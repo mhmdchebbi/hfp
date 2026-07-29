@@ -12,6 +12,9 @@ output
 # Intellij Idea
 .idea
 
+# VsCode
+.vscode
+
 # Log file
 *.log
 
