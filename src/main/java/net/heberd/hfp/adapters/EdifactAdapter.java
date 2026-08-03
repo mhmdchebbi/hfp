@@ -18,6 +18,10 @@ public class EdifactAdapter extends RouteBuilder {
 				.routeId("edifact-file-to-smooks")
 				.to("smooks:smooks-edifact-config.xml")
 				.log("Parsed EDIFACT as XML: ${body}")
+				.to("activemq6:queue:BSCS_RECEIPT_QUEUE");
+
+				from("activemq6:queue:BSCS_RECEIPT_QUEUE")
+				.log("Message from ActiveMQ: ${body}")
 				.to("file:output/processed?fileName=receipt.txt");
 	}
 
